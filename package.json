@@ -1,0 +1,17 @@
+{
+  "name": "result-core",
+  "version": "0.1.0",
+  "description": "minimal result reification",
+  "dependencies": {},
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jkroso/result-core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jkroso/result-core/issues"
+  },
+  "keywords": ["result", "computation", "promise", "future", "thenable", "reify"],
+  "author": "Jake Rosoman",
+  "license": "MIT"
+}
