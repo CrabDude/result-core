@@ -1,7 +1,5 @@
 
-module.exports = Result
-
-function Result(){}
+var Result = module.exports = require('./type')
 
 /**
  * default state
