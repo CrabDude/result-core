@@ -1,5 +1,12 @@
 
-var Result = module.exports = require('./type')
+var ResultType = require('result-type')
+  , inherit = require('inherit')
+
+module.exports = Result
+
+inherit(Result, ResultType)
+
+function Result(){}
 
 /**
  * default state
