@@ -4,6 +4,7 @@
   "description": "minimal result reification",
   "dependencies": {
     "inherit": "http://github.com/nathan7/inherit/tarball/f1a75b4844",
+    "next-tick": "http://github.com/timoxley/next-tick/tarball/0.0.2",
     "result-type": "1.0.0"
   },
   "devDependencies": {},

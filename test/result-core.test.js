@@ -1,4 +1,5 @@
 
+var onCrash = require('on-crash')
 var chai = require('./chai')
 
 module.exports = function(Result){
@@ -16,7 +17,7 @@ module.exports = function(Result){
 					val.should.equal(5)
 					spy()
 				}).write(5)
-				spy.should.have.been.called
+				spy.should.have.been.called(1)
 			})
 
 			it('should deliver its eventual rejection to readers', function(){
@@ -25,7 +26,7 @@ module.exports = function(Result){
 					e.should.have.property('message', title)
 					spy()
 				}).error(new Error(title))
-				spy.should.have.been.called
+				spy.should.have.been.called(1)
 			})
 
 			it('should call readers in the order they were added', function(){
@@ -47,23 +48,20 @@ module.exports = function(Result){
 						spy.should.not.have.been.called(1)
 					})
 				}).read(spy)
-				
+
 				result.write()
 				spy.should.have.been.called(1)
 			})
 
-			it('should be affected by errors in readers', function(){
-				var calls = 0
+			it('should not be affected by errors in readers', function(done){
 				var title = this.test.title;
-				(function(){
-					result.read(function(){
-						(calls++).should.equal(0)
-						throw new Error(title)
-					}).read(function(){
-						(calls++).should.equal(1)
-					}).write()
-				}).should.throw(title)
-				calls.should.equal(1)
+				onCrash(done)
+				result.read(function(){
+					spy.should.not.have.been.called()
+					spy()
+					throw new Error(title)
+				}).read(spy).write()
+				spy.should.have.been.called(2)
 			})
 		})
 
@@ -73,7 +71,7 @@ module.exports = function(Result){
 					val.should.equal(5)
 					spy()
 				})
-				spy.should.have.been.called
+				spy.should.have.been.called(1)
 			})
 
 			it('should be affected by errors in readers', function(){
@@ -92,7 +90,7 @@ module.exports = function(Result){
 					reason.should.equal(5)
 					spy()
 				})
-				spy.should.have.been.called
+				spy.should.have.been.called(1)
 			})
 
 			it('should be affected by errors in readers', function(){

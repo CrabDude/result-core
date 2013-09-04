@@ -1,6 +1,7 @@
 
 var ResultType = require('result-type')
-  , inherit = require('inherit')
+var nextTick = require('next-tick')
+var inherit = require('inherit')
 
 module.exports = Result
 
@@ -17,7 +18,7 @@ Result.prototype.state = 'pending'
 
 /**
  * give `this` its value
- * 
+ *
  * @param {x} value
  * @return {this}
  */
@@ -29,7 +30,7 @@ Result.prototype.write = function(value){
 		var deps = this._onValue
 		var i = 0
 		if (deps) while (i < deps.length) {
-			deps[i++](value)
+			run(deps[i++], value)
 		}
 	}
 	return this
@@ -37,7 +38,7 @@ Result.prototype.write = function(value){
 
 /**
  * give `this` its reason for failure
- * 
+ *
  * @param {x} reason
  * @return {this}
  */
@@ -49,7 +50,7 @@ Result.prototype.error = function(reason){
 		var deps = this._onError
 		var i = 0
 		if (deps) while (i < deps.length) {
-			deps[i++](reason)
+			run(deps[i++], reason)
 		}
 	}
 	return this
@@ -57,7 +58,7 @@ Result.prototype.error = function(reason){
 
 /**
  * access the result of `this`
- * 
+ *
  * @param {Function} onValue
  * @param {Function} onError
  * @return {this}
@@ -80,7 +81,7 @@ Result.prototype.read = function(onValue, onError){
 
 /**
  * add a listener
- * 
+ *
  * @param {String} prop
  * @param {Function} fn
  * @api private
@@ -89,4 +90,22 @@ Result.prototype.read = function(onValue, onError){
 function listen(prop, fn){
 	if (this[prop]) this[prop].push(fn)
 	else this[prop] = [fn]
+}
+
+/**
+ * run `fn` and ensure any errors it throws
+ * aren't caught by anyone and therefore
+ * cause the process to crash. Errors should
+ * be caught _within_ handlers
+ *
+ * @param {Function} fn
+ * @param {Any} value
+ * @api private
+ */
+
+function run(fn, value){
+	try { fn(value) }
+	catch (e) {
+		nextTick(function(e){ throw e })
+	}
 }
