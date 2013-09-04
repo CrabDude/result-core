@@ -2,7 +2,7 @@
   "name": "result-core",
   "repo": "jkroso/result-core",
   "description": "minimal result reification",
-  "version": "0.1.3",
+  "version": "1.0.4",
   "keywords": [
     "result",
     "computation",
@@ -16,9 +16,9 @@
     "component/inherit": "0.0.2"
   },
   "development": {
-    "visionmedia/mocha": "1.11.0",
-    "jkroso/serve": "1.4.2",
-    "chaijs/chai": "1.7.0",
+    "visionmedia/mocha": "1.12.1",
+    "jkroso/serve": "1.5.0",
+    "chaijs/chai": "1.7.2",
     "chaijs/chai-spies": "0.5.1"
   },
   "scripts": [
