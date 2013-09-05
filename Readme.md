@@ -1,11 +1,13 @@
 
 # result-core
 
-  Minimal function call reification. This library is designed both to be useful in simple cases and serve as a specification for how alternative implementations should behave. See [result](//github.com/jkroso/result) and [lazy-result](//github.com/jkroso/lazy-result) for examples. Note how they inherit from this class, making them easy to distinguish from other types. No duck typing required. This makes general purpose utilities such as [when](//github.com/jkroso/when) much easier to write.
+  JavaScript doesn't allow you to spawn new threads. Nore does it allow you to park a thread progamatically. Instead it uses an "event loop", which functions as a sort of work queue. It allows you to request an operation and register a function to be called when its completed. This function is called a "callback" and it provides all the synchronisation we need to compose computations however it leaves our control flow model FUBAR. Normally we think of values and errors as propagating up and down an implicit call stack. When a child computation completes it is returned to its parent frame where it can be passed into other computation frames or simply ignored and allowed to propagate up the stack. Meanwhile, in the "event loop" model values/errors are passed in to the callbacks as arguments which means both that they never become available in the parent context and that they can't just be allowed to propagate. Also without callstack's our error objects are mostly garbage.
+
+  Results are an attempt to re-build the call stack conceptual model back on top of the callback model. The approach they take is to ask you to reify your asynchronous function calls with a Result instance. These instances model a stack frame in that it will eventually be either a successfully computed value or an error. Once you have reified your async function calls with runtime objects you can compose them together and recreate the computation tree that is normally implicit and maintained underneath the runtime. This implementation does nothing to improve the stack traces of your errors but that feature could be added.
 
 ## Installation
 
-_With [component](//github.com/component/component), [packin](//github.com/jkroso/packin) or [npm](//github.com/isaacs/npm)_  
+_With [component](//github.com/component/component), [packin](//github.com/jkroso/packin) or [npm](//github.com/isaacs/npm)_
 
 	$ {package mananger} install jkroso/result-core
 
@@ -16,8 +18,6 @@ var Result = require('result-core')
 ```
 
 ## API
-
-- [Result()](#result)
 
 ### Result()
 
@@ -30,15 +30,22 @@ function add(a, b){
 	return result
 }
 
-add(1, 2).read(function(three){
-	console.log('1 + 2 = %d', three)
+add(1, 2).read(function(n){
+	console.log('1 + 2 = %d', n)
 })
 ```
 
-## FAQ
+### Result.write(value)
 
-__Q:__ How the fuck is that useful?  
-__A:__ async programming  
+  give `this` its value
+
+### Result.error(reason)
+
+  give `this` its reason for failure
+
+### Result.read([onValue], [onError])
+
+  access the result of `this`
 
 ## Running the tests
 
