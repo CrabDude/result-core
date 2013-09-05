@@ -36,7 +36,7 @@ Result.prototype.write = function(value){
 	if (this.state == 'pending') {
 		this.state = 'done'
 		this.value = value
-		run(this._onValue, value, this)
+		this._onValue && run(this, this._onValue)
 	}
 	return this
 }
@@ -52,7 +52,7 @@ Result.prototype.error = function(reason){
 	if (this.state == 'pending') {
 		this.state = 'fail'
 		this.value = reason
-		run(this._onError, reason, this)
+		this._onError && run(this, this._onError)
 	}
 	return this
 }
@@ -61,16 +61,14 @@ Result.prototype.error = function(reason){
  * dispatch to `runFn` on the type of `fns`
  *
  * @param {Function} fns
- * @param {Any} value
  * @param {ctx} Result
  * @api private
  */
 
-function run(fns, value, ctx){
-	if (!fns) return
-	if (typeof fns == 'function') runFn(fns, value, ctx)
+function run(ctx, fns){
+	if (typeof fns == 'function') runFn(ctx, fns)
 	else for (var i = 0, len = fns.length; i < len;) {
-		runFn(fns[i++], value, ctx)
+		runFn(ctx, fns[i++])
 	}
 }
 
@@ -90,14 +88,13 @@ function run(fns, value, ctx){
  *   }
  *
  * @param {Function} fn
- * @param {Any} value
  * @param {Result} ctx
  * @api private
  */
 
-function runFn(fn, value, ctx){
-	try { fn.call(ctx, value) }
-	catch (e) { nextTick(function(){ throw e }) }
+function runFn(ctx, fn){
+	try { fn.call(ctx, ctx.value) }
+	catch (e) { nextTick(function(){ throw e}) }
 }
 
 /**
@@ -111,17 +108,22 @@ function runFn(fn, value, ctx){
 Result.prototype.read = function(onValue, onError){
 	switch (this.state) {
 		case 'pending':
-			if (onValue) listen(this, '_onValue', onValue)
-			if (onError) listen(this, '_onError', onError)
+			onValue && listen(this, '_onValue', onValue)
+			onError && listen(this, '_onError', onError)
 			break
 		case 'done':
-			runFn(onValue, this.value, this)
+			onValue && runFn(this, onValue)
 			break
 		case 'fail':
-			runFn(onError, this.value, this)
+			if (onError) runFn(this, onError)
+			else thro(this.value)
 			break
 	}
 	return this
+}
+
+function thro(error){
+	nextTick(function(){ throw error })
 }
 
 /**

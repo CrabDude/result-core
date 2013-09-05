@@ -32,13 +32,32 @@ describe('Result-core', function(){
 			spy.should.have.been.called(1)
 		})
 
-		it('should deliver its eventual rejection to readers', function(){
-			var title = this.test.title
+		it('should deliver its eventual rejection to readers', function(done){
 			result.read(null, function(e){
-				e.should.have.property('message', title)
-				spy()
-			}).error(new Error(title))
-			spy.should.have.been.called(1)
+				e.should.have.property('message', error.message)
+				done()
+			}).error(error)
+		})
+
+		describe('when readers are missing `onError`', function(){
+			it('should throw async', function(done){
+				onCrash(function(e){
+					e.should.have.property('message', error.message)
+					done()
+				})
+				result.read(spy).error(error)
+			})
+
+			it('even if other readers have `onError` listeners', function(done){
+				onCrash(function(e){
+					e.should.have.property('message', error.message)
+					done()
+				})
+				result
+				.read(spy, spy)
+				.read(spy)
+				.error(error)
+			})
 		})
 
 		it('should call readers in the order they were added', function(){
@@ -77,24 +96,28 @@ describe('Result-core', function(){
 		})
 
 		it('should not be affected by errors in readers', function(done){
-			var title = this.test.title
-			onCrash(done)
+			onCrash(function(e){
+				e.message.should.equal(error.message)
+				done()
+			})
 			result.read(function(){
 				spy.should.not.have.been.called()
 				spy()
-				throw new Error(title)
+				throw error
 			}).read(spy).write()
 			spy.should.have.been.called(2)
+		})
+
+		it('should not throw if there aren\'t any readers', function(done){
+			result.error(error)
+			setTimeout(done, 0)
 		})
 	})
 
 	describe('done state', function(){
 		it('should deliver its cached value to readers', function(){
-			result.write(5).read(function(val){
-				val.should.equal(5)
-				spy()
-			})
-			spy.should.have.been.called(1)
+			value.read(spy)
+			spy.should.have.been.called.with(1)
 		})
 
 		it('should call functions in the correct context', function(done){
@@ -104,12 +127,28 @@ describe('Result-core', function(){
 			})
 		})
 
+		describe('when readers are missing onValue handlers', function(){
+			it('should\'t have a problem', function(){
+				value.read(null, spy)
+				spy.should.not.have.been.called()
+			})
+
+			it('even when some readers do and some don\'t', function(){
+				value
+				.read(spy)
+				.read(null, spy)
+				spy.should.have.been.called(1)
+			})
+		})
+
 		it('should not be affected by errors in readers', function(done){
-			onCrash(done)
-			var title = this.test.title
+			onCrash(function(e){
+				e.message.should.equal(error.message)
+				done()
+			})
 			try {
 				value.read(function(){
-					throw new Error(title)
+					throw error
 				})
 			} catch (e) {
 				done(new Error('should not throw sync'))
@@ -119,11 +158,8 @@ describe('Result-core', function(){
 
 	describe('fail state', function(){
 		it('should deliver its cached reason to readers', function(){
-			result.error(5).read(null, function(reason){
-				reason.should.equal(5)
-				spy()
-			})
-			spy.should.have.been.called(1)
+			failed.read(null, spy)
+			spy.should.have.been.called.with(error)
 		})
 
 		it('should call functions in the correct context', function(done){
@@ -133,12 +169,37 @@ describe('Result-core', function(){
 			})
 		})
 
+		describe('when readers are missing onError handlers', function(){
+			it('should throw async', function(done){
+				onCrash(function(e){
+					e.message.should.equal(error.message)
+					done()
+				})
+				try { failed.read(spy) }
+				catch (e) { done(e) }
+				spy.should.not.have.been.called()
+			})
+
+			it('should throw async when just one is missing an onError', function(done){
+				onCrash(function(e){
+					e.message.should.equal(error.message)
+					done()
+				})
+				failed
+				.read(null, spy)
+				.read(spy)
+				spy.should.have.been.called(1).with(error)
+			})
+		})
+
 		it('should not be affected by errors in readers', function(done){
-			var title = this.test.title
-			onCrash(done)
+			onCrash(function(e){
+				e.message.should.equal(error.message)
+				done()
+			})
 			try {
-				result.error(5).read(null, function(){
-					throw new Error(title)
+				failed.read(null, function(){
+					throw error
 				})
 			} catch (e) {
 				done(new Error('should not throw sync'))

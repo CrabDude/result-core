@@ -21,7 +21,7 @@
     "jkroso/serve": "1.5.0",
     "chaijs/chai": "1.7.2",
     "chaijs/chai-spies": "0.5.1",
-    "jkroso/on-crash": "0.1.0"
+    "jkroso/on-crash": "0.1.1"
   },
   "scripts": [
     "index.js"
