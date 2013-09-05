@@ -3,7 +3,7 @@ var onCrash = require('on-crash')
 var chai = require('./chai')
 var Result = require('..')
 
-describe('result-core', function(){
+describe('Result-core', function(){
 	var result
 	var spy
 	var failed

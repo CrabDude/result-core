@@ -3,7 +3,8 @@ var ResultType = require('result-type')
 var nextTick = require('next-tick')
 var inherit = require('inherit')
 
-module.exports = Result
+module.exports = exports = Result
+exports.addListener = listen
 
 /**
  * inherit from ResultType
@@ -129,7 +130,7 @@ Result.prototype.read = function(onValue, onError){
  * @param {Result} obj
  * @param {String} prop
  * @param {Function} fn
- * @api private
+ * @api public
  */
 
 function listen(obj, prop, fn){
