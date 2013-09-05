@@ -5,7 +5,15 @@ var inherit = require('inherit')
 
 module.exports = Result
 
+/**
+ * inherit from ResultType
+ */
+
 inherit(Result, ResultType)
+
+/**
+ * the result class
+ */
 
 function Result(){}
 
@@ -27,11 +35,7 @@ Result.prototype.write = function(value){
 	if (this.state == 'pending') {
 		this.state = 'done'
 		this.value = value
-		var deps = this._onValue
-		var i = 0
-		if (deps) while (i < deps.length) {
-			run(deps[i++], value)
-		}
+		run(this._onValue, value, this)
 	}
 	return this
 }
@@ -46,14 +50,53 @@ Result.prototype.write = function(value){
 Result.prototype.error = function(reason){
 	if (this.state == 'pending') {
 		this.state = 'fail'
-		this.reason = reason
-		var deps = this._onError
-		var i = 0
-		if (deps) while (i < deps.length) {
-			run(deps[i++], reason)
-		}
+		this.value = reason
+		run(this._onError, reason, this)
 	}
 	return this
+}
+
+/**
+ * dispatch to `runFn` on the type of `fns`
+ *
+ * @param {Function} fns
+ * @param {Any} value
+ * @param {ctx} Result
+ * @api private
+ */
+
+function run(fns, value, ctx){
+	if (!fns) return
+	if (typeof fns == 'function') runFn(fns, value, ctx)
+	else for (var i = 0, len = fns.length; i < len;) {
+		runFn(fns[i++], value, ctx)
+	}
+}
+
+/**
+ * run `fn` and re-throw any errors with a clean
+ * stack to ensure they aren't caught unwittingly.
+ * since readers are sometimes run now and sometimes
+ * later the following would be non-deterministic
+ *
+ *   try {
+ *     result.read(function(){
+ *       throw(new Error('boom'))
+ *     })
+ *   } catch (e) {
+ *     // if result is "done" boom is caught, while
+ *     // if result is "pending" it won't be caught
+ *   }
+ *
+ * @param {Function} fn
+ * @param {Any} value
+ * @param {Result} ctx
+ * @api private
+ */
+
+function runFn(fn, value, ctx){
+	try { fn.call(ctx, value) }
+	catch (e) { nextTick(function(){ throw e }) }
 }
 
 /**
@@ -67,14 +110,14 @@ Result.prototype.error = function(reason){
 Result.prototype.read = function(onValue, onError){
 	switch (this.state) {
 		case 'pending':
-			if (onValue) listen.call(this, '_onValue', onValue)
-			if (onError) listen.call(this, '_onError', onError)
+			if (onValue) listen(this, '_onValue', onValue)
+			if (onError) listen(this, '_onError', onError)
 			break
 		case 'done':
-			onValue(this.value)
+			onValue.call(this, this.value)
 			break
 		case 'fail':
-			onError(this.reason)
+			onError.call(this, this.value)
 	}
 	return this
 }
@@ -82,30 +125,15 @@ Result.prototype.read = function(onValue, onError){
 /**
  * add a listener
  *
+ * @param {Result} obj
  * @param {String} prop
  * @param {Function} fn
  * @api private
  */
 
-function listen(prop, fn){
-	if (this[prop]) this[prop].push(fn)
-	else this[prop] = [fn]
-}
-
-/**
- * run `fn` and ensure any errors it throws
- * aren't caught by anyone and therefore
- * cause the process to crash. Errors should
- * be caught _within_ handlers
- *
- * @param {Function} fn
- * @param {Any} value
- * @api private
- */
-
-function run(fn, value){
-	try { fn(value) }
-	catch (e) {
-		nextTick(function(e){ throw e })
-	}
+function listen(obj, prop, fn){
+	var fns = obj[prop]
+	if (!fns) obj[prop] = fn
+	else if (typeof fns == 'function') obj[prop] = [fns, fn]
+	else obj[prop].push(fn)
 }
