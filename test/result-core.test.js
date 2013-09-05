@@ -104,13 +104,16 @@ describe('result-core', function(){
 			})
 		})
 
-		it('should be affected by errors in readers', function(){
-			var title = this.test.title;
-			(function(){
-				result.write(5).read(function(){
+		it('should not be affected by errors in readers', function(done){
+			onCrash(done)
+			var title = this.test.title
+			try {
+				value.read(function(){
 					throw new Error(title)
 				})
-			}).should.throw(title)
+			} catch (e) {
+				done(new Error('should not throw sync'))
+			}
 		})
 	})
 
@@ -130,13 +133,16 @@ describe('result-core', function(){
 			})
 		})
 
-		it('should be affected by errors in readers', function(){
-			var title = this.test.title;
-			(function(){
+		it('should not be affected by errors in readers', function(done){
+			var title = this.test.title
+			onCrash(done)
+			try {
 				result.error(5).read(null, function(){
 					throw new Error(title)
 				})
-			}).should.throw(title)
+			} catch (e) {
+				done(new Error('should not throw sync'))
+			}
 		})
 	})
 })

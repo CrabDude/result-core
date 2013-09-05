@@ -114,10 +114,11 @@ Result.prototype.read = function(onValue, onError){
 			if (onError) listen(this, '_onError', onError)
 			break
 		case 'done':
-			onValue.call(this, this.value)
+			runFn(onValue, this.value, this)
 			break
 		case 'fail':
-			onError.call(this, this.value)
+			runFn(onError, this.value, this)
+			break
 	}
 	return this
 }
