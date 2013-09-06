@@ -94,7 +94,7 @@ function run(ctx, fns){
 
 function runFn(ctx, fn){
 	try { fn.call(ctx, ctx.value) }
-	catch (e) { nextTick(function(){ throw e}) }
+	catch (e) { rethrow(e) }
 }
 
 /**
@@ -109,20 +109,20 @@ Result.prototype.read = function(onValue, onError){
 	switch (this.state) {
 		case 'pending':
 			onValue && listen(this, '_onValue', onValue)
-			onError && listen(this, '_onError', onError)
+			listen(this, '_onError', onError || rethrow)
 			break
 		case 'done':
 			onValue && runFn(this, onValue)
 			break
 		case 'fail':
 			if (onError) runFn(this, onError)
-			else thro(this.value)
+			else rethrow(this.value)
 			break
 	}
 	return this
 }
 
-function thro(error){
+function rethrow(error){
 	nextTick(function(){ throw error })
 }
 
