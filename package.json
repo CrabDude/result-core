@@ -7,7 +7,6 @@
     "next-tick": "http://github.com/timoxley/next-tick/tarball/0.0.2",
     "result-type": "1.0.0"
   },
-  "devDependencies": {},
   "repository": {
     "type": "git",
     "url": "git://github.com/jkroso/result-core.git"
@@ -17,5 +16,6 @@
   },
   "keywords": ["result", "computation", "promise", "future", "thenable", "reify"],
   "author": "Jake Rosoman",
-  "license": "MIT"
+  "license": "MIT",
+  "files": [ "index.js" ]
 }
