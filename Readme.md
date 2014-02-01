@@ -87,6 +87,6 @@ one.read(function(n){
 two.read(
   null, // value handlers are also optional
   function(e){
-    e // => 3
+    e // => err
   })
 ```
