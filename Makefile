@@ -1,20 +1,14 @@
-REPORTER=dot
 
 serve: node_modules
-	@node_modules/serve/bin/serve -Sloj
+	@node_modules/serve/bin/serve -Slojp 0
 
 test: node_modules
-	@node_modules/mocha/bin/_mocha test/*.test.js \
-		--reporter $(REPORTER) \
-		--timeout 500 \
-		--check-leaks \
-		--bail
+	@sed "s/'result-core'/'.\/'/" Readme.md | node_modules/jsmd/bin/jsmd
+	@node_modules/hydro/bin/hydro test/*.test.js \
+		--formatter $$PWD/node_modules/hydro-dot \
+		--setup test/hydro.conf.js
 
-node_modules: component.json package.json
-	@packin install \
-		--meta package.json,component.json,deps.json \
-		--folder node_modules \
-		--executables \
-		--no-retrace
+node_modules: package.json
+	@packin install --meta $< --folder $@
 
 .PHONY: serve test
