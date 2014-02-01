@@ -33,12 +33,12 @@ Result.prototype.state = 'pending'
  */
 
 Result.prototype.write = function(value){
-	if (this.state == 'pending') {
-		this.state = 'done'
-		this.value = value
-		this._onValue && run(this, this._onValue)
-	}
-	return this
+  if (this.state == 'pending') {
+    this.state = 'done'
+    this.value = value
+    this._onValue && run(this, this._onValue)
+  }
+  return this
 }
 
 /**
@@ -49,12 +49,12 @@ Result.prototype.write = function(value){
  */
 
 Result.prototype.error = function(reason){
-	if (this.state == 'pending') {
-		this.state = 'fail'
-		this.value = reason
-		this._onError && run(this, this._onError)
-	}
-	return this
+  if (this.state == 'pending') {
+    this.state = 'fail'
+    this.value = reason
+    this._onError && run(this, this._onError)
+  }
+  return this
 }
 
 /**
@@ -66,10 +66,10 @@ Result.prototype.error = function(reason){
  */
 
 function run(ctx, fns){
-	if (typeof fns == 'function') runFn(ctx, fns)
-	else for (var i = 0, len = fns.length; i < len;) {
-		runFn(ctx, fns[i++])
-	}
+  if (typeof fns == 'function') runFn(ctx, fns)
+  else for (var i = 0, len = fns.length; i < len;) {
+    runFn(ctx, fns[i++])
+  }
 }
 
 /**
@@ -93,8 +93,8 @@ function run(ctx, fns){
  */
 
 function runFn(ctx, fn){
-	try { fn.call(ctx, ctx.value) }
-	catch (e) { rethrow(e) }
+  try { fn.call(ctx, ctx.value) }
+  catch (e) { rethrow(e) }
 }
 
 /**
@@ -106,24 +106,24 @@ function runFn(ctx, fn){
  */
 
 Result.prototype.read = function(onValue, onError){
-	switch (this.state) {
-		case 'pending':
-			onValue && listen(this, '_onValue', onValue)
-			listen(this, '_onError', onError || rethrow)
-			break
-		case 'done':
-			onValue && runFn(this, onValue)
-			break
-		case 'fail':
-			if (onError) runFn(this, onError)
-			else rethrow(this.value)
-			break
-	}
-	return this
+  switch (this.state) {
+    case 'pending':
+      onValue && listen(this, '_onValue', onValue)
+      listen(this, '_onError', onError || rethrow)
+      break
+    case 'done':
+      onValue && runFn(this, onValue)
+      break
+    case 'fail':
+      if (onError) runFn(this, onError)
+      else rethrow(this.value)
+      break
+  }
+  return this
 }
 
 function rethrow(error){
-	nextTick(function(){ throw error })
+  nextTick(function(){ throw error })
 }
 
 /**
@@ -136,8 +136,8 @@ function rethrow(error){
  */
 
 function listen(obj, prop, fn){
-	var fns = obj[prop]
-	if (!fns) obj[prop] = fn
-	else if (typeof fns == 'function') obj[prop] = [fns, fn]
-	else obj[prop].push(fn)
+  var fns = obj[prop]
+  if (!fns) obj[prop] = fn
+  else if (typeof fns == 'function') obj[prop] = [fns, fn]
+  else obj[prop].push(fn)
 }
