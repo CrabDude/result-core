@@ -1,20 +1,27 @@
 {
   "name": "result-core",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "minimal result reification",
+  "keywords": ["result", "promise", "future"],
   "dependencies": {
-    "inherit": "http://github.com/nathan7/inherit/tarball/f1a75b4844",
-    "next-tick": "http://github.com/timoxley/next-tick/tarball/0.0.2",
+    "inherit": "nathan7/inherit#f1a75b4844",
+    "next-tick": "timoxley/next-tick#0.0.2",
     "result-type": "1.0.0"
   },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/jkroso/result-core.git"
+  "devDependencies": {
+    "serve": "jkroso/serve",
+    "chai-spies": "*",
+    "hydro-html": "*",
+    "hydro-chai": "*",
+    "hydro-bdd": "*",
+    "hydro-dot": "*",
+    "hydro": "*",
+    "chai": "*",
+    "jsmd": "*",
+    "tryc": "*"
   },
-  "bugs": {
-    "url": "https://github.com/jkroso/result-core/issues"
-  },
-  "keywords": ["result", "computation", "promise", "future", "thenable", "reify"],
+  "repository": "git://github.com/jkroso/result-core.git",
+  "bugs": "https://github.com/jkroso/result-core/issues",
   "author": "Jake Rosoman",
   "license": "MIT",
   "files": [ "index.js" ]

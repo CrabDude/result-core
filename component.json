@@ -2,29 +2,12 @@
   "name": "result-core",
   "repo": "jkroso/result-core",
   "description": "minimal result reification",
-  "version": "1.1.2",
-  "keywords": [
-    "result",
-    "computation",
-    "promise",
-    "future",
-    "thenable",
-    "reify"
-  ],
+  "keywords": ["result", "promise", "future"],
   "dependencies": {
     "jkroso/result-type": "1.0.0",
-    "component/inherit": "0.0.2",
-    "timoxley/next-tick": "0.0.2"
+    "timoxley/next-tick": "0.0.2",
+    "component/inherit": "0.0.2"
   },
-  "development": {
-    "visionmedia/mocha": "1.12.1",
-    "jkroso/serve": "1.5.0",
-    "chaijs/chai": "1.7.2",
-    "chaijs/chai-spies": "0.5.1",
-    "jkroso/on-crash": "0.1.1"
-  },
-  "scripts": [
-    "index.js"
-  ],
+  "scripts": ["index.js"],
   "license": "MIT"
 }
