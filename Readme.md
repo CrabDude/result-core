@@ -9,9 +9,11 @@
 
 ## Installation
 
-_With [component](//github.com/component/component), [packin](//github.com/jkroso/packin) or [npm](//github.com/isaacs/npm)_
+With your favourite package manager:
 
-	$ {package mananger} install jkroso/result-core
+- [packin](//github.com/jkroso/packin): `packin add result-core`
+- [component](//github.com/component/component#installing-packages): `component install jkroso/result`
+- [npm](//npmjs.org/doc/cli/npm-install.html): `npm install result-core`
 
 then in your app:
 
@@ -32,23 +34,31 @@ function add(a, b){
   return result
 }
 
-add(1, 2).read(function(n){
-  console.log('1 + 2 = %d', n)
-})
+add(1, 2).value // => 3
 ```
 
-### Result.write(value)
+### Result#write(value)
 
-  give `this` its value
+  give the Result its value
 
-### Result.error(reason)
+```js
+new Result().write(1)
+```
 
-  give `this` its reason for failure
+### Result#error(reason)
 
-### Result.read([onValue], [onError])
+  give the Result its reason for failure
+
+```js
+new Result().error(new Error('coz oops'))
+```
+
+### Result#read([onValue], [onError])
 
   access the result of `this`
 
-## Running the tests
-
-Just run `make`. It will install and start a development server so all you then need to do is point your browser to `localhost:3000/test`. Likewise to run the Koans.
+```js
+add(1, 2).read(function(n){
+  n // => 3
+})
+```
