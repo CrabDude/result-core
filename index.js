@@ -3,8 +3,7 @@ var ResultType = require('result-type')
 var nextTick = require('next-tick')
 var inherit = require('inherit')
 
-module.exports = exports = Result
-exports.addListener = listen
+module.exports = Result
 
 /**
  * inherit from ResultType
@@ -58,6 +57,49 @@ Result.prototype.error = function(reason){
 }
 
 /**
+ * access the result of `this`
+ *
+ * @param {Function} onValue
+ * @param {Function} onError
+ * @return {this}
+ */
+
+Result.prototype.read = function(onValue, onError){
+  switch (this.state) {
+    case 'done':
+      onValue && runFn(this, onValue)
+      break
+    case 'fail':
+      if (onError) runFn(this, onError)
+      else rethrow(this.value)
+      break
+    default:
+      this.listen(onValue, onError || rethrow)
+  }
+  return this
+}
+
+/**
+ * add listeners for the result
+ *
+ * @param {Function} onValue
+ * @param {Function} onError
+ * @return {this}
+ */
+
+Result.prototype.listen = function(onValue, onError){
+  onValue && listen(this, '_onValue', onValue)
+  onError && listen(this, '_onError', onError)
+}
+
+function listen(obj, prop, fn){
+  var fns = obj[prop]
+  if (!fns) obj[prop] = fn
+  else if (typeof fns == 'function') obj[prop] = [fns, fn]
+  else obj[prop].push(fn)
+}
+
+/**
  * dispatch to `runFn` on the type of `fns`
  *
  * @param {Function} fns
@@ -97,47 +139,6 @@ function runFn(ctx, fn){
   catch (e) { rethrow(e) }
 }
 
-/**
- * access the result of `this`
- *
- * @param {Function} onValue
- * @param {Function} onError
- * @return {this}
- */
-
-Result.prototype.read = function(onValue, onError){
-  switch (this.state) {
-    case 'pending':
-      onValue && listen(this, '_onValue', onValue)
-      listen(this, '_onError', onError || rethrow)
-      break
-    case 'done':
-      onValue && runFn(this, onValue)
-      break
-    case 'fail':
-      if (onError) runFn(this, onError)
-      else rethrow(this.value)
-      break
-  }
-  return this
-}
-
 function rethrow(error){
   nextTick(function(){ throw error })
-}
-
-/**
- * add a listener
- *
- * @param {Result} obj
- * @param {String} prop
- * @param {Function} fn
- * @api public
- */
-
-function listen(obj, prop, fn){
-  var fns = obj[prop]
-  if (!fns) obj[prop] = fn
-  else if (typeof fns == 'function') obj[prop] = [fns, fn]
-  else obj[prop].push(fn)
 }
