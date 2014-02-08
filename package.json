@@ -1,10 +1,9 @@
 {
   "name": "result-core",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "minimal result reification",
   "keywords": ["result", "promise", "future"],
   "dependencies": {
-    "inherit": "nathan7/inherit#f1a75b4844",
     "next-tick": "timoxley/next-tick#0.0.2",
     "result-type": "1.0.0"
   },

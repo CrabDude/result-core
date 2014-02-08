@@ -1,21 +1,20 @@
 
 var ResultType = require('result-type')
 var nextTick = require('next-tick')
-var inherit = require('inherit')
 
 module.exports = Result
-
-/**
- * inherit from ResultType
- */
-
-inherit(Result, ResultType)
 
 /**
  * the result class
  */
 
 function Result(){}
+
+/**
+ * inherit from ResultType
+ */
+
+Result.prototype = new ResultType
 
 /**
  * default state
