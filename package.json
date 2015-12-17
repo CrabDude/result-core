@@ -1,6 +1,6 @@
 {
   "name": "result-core",
-  "version": "1.2.1",
+  "version": "2.0.0",
   "description": "minimal result reification",
   "keywords": ["result", "promise", "future"],
   "dependencies": {
@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "serve": "jkroso/serve",
+    "future-node": "0",
     "chai-spies": "*",
     "hydro-html": "*",
     "hydro-chai": "*",
@@ -16,9 +17,9 @@
     "hydro-dot": "*",
     "hydro": "*",
     "chai": "*",
-    "jsmd": "*",
     "tryc": "*"
   },
+  "transpile": [["*.js", "!sourcegraph/babel->js", {"stage": 0}]],
   "repository": "git://github.com/jkroso/result-core.git",
   "bugs": "https://github.com/jkroso/result-core/issues",
   "author": "Jake Rosoman",

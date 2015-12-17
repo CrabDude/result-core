@@ -1,6 +1,5 @@
-
-var Result = require('..')
-var tryc = require('tryc')
+import Result from '..'
+import tryc from 'tryc'
 
 var result
 var spy
@@ -9,15 +8,11 @@ var value
 var error
 var test = 1
 
-before(function(){
-  result = new Result
+before(() => {
+  result = new Result('pending')
   error = new Error('from test #' + test++)
-  failed = new Result
-  failed.state = 'fail'
-  failed.value = error
-  value = new Result
-  value.state = 'done'
-  value.value = 1
+  failed = new Result('fail', error)
+  value = new Result('done', 1)
   spy = chai.spy()
 })
 
@@ -80,17 +75,6 @@ describe('pending state', function(){
     spy.should.have.been.called(1)
   })
 
-  it('should call functions in the correct context', function(done){
-    result.read(function(){
-      result.should.equal(this)
-      var fail = new Result
-      fail.read(null, function(){
-        fail.should.equal(this)
-        done()
-      }).error(error)
-    }).write(1)
-  })
-
   it('should not be affected by errors in readers', function(done){
     tryc(function(){
       result.read(function(){
@@ -115,13 +99,6 @@ describe('done state', function(){
   it('should deliver its cached value to readers', function(){
     value.read(spy)
     spy.should.have.been.called.with(1)
-  })
-
-  it('should call functions in the correct context', function(done){
-    value.read(function(){
-      value.should.equal(this)
-      done()
-    })
   })
 
   describe('when readers are missing onValue handlers', function(){
@@ -155,13 +132,6 @@ describe('fail state', function(){
   it('should deliver its cached reason to readers', function(){
     failed.read(null, spy)
     spy.should.have.been.called.with(error)
-  })
-
-  it('should call functions in the correct context', function(done){
-    failed.read(null, function(){
-      failed.should.equal(this)
-      done()
-    })
   })
 
   describe('when readers are missing onError handlers', function(){

@@ -1,97 +1,83 @@
+import ResultType from 'result-type'
+import nextTick from 'next-tick'
 
-var ResultType = require('result-type')
-var nextTick = require('next-tick')
-
-module.exports = Result
-
-/**
- * the result class
- */
-
-function Result(){}
-
-/**
- * inherit from ResultType
- */
-
-Result.prototype = new ResultType
-
-/**
- * default state
- * @type {String}
- */
-
-Result.prototype.state = 'pending'
-
-/**
- * give `this` its value
- *
- * @param {x} value
- * @return {this}
- */
-
-Result.prototype.write = function(value){
-  if (this.state == 'pending') {
-    this.state = 'done'
+export default class Result extends ResultType {
+  constructor(state, value) {
+    super()
+    this.state = state
     this.value = value
-    this._onValue && run(this, this._onValue)
   }
-  return this
-}
 
-/**
- * give `this` its reason for failure
- *
- * @param {x} reason
- * @return {this}
- */
+  /**
+  * give `this` its value
+  *
+  * @param {x} value
+  * @return {this}
+  */
 
-Result.prototype.error = function(reason){
-  if (this.state == 'pending') {
-    this.state = 'fail'
-    this.value = reason
-    this._onError && run(this, this._onError)
+  write(value) {
+    if (this.state == 'pending') {
+      this.state = 'done'
+      this.value = value
+      this._onValue && run(this, this._onValue)
+    }
+    return this
   }
-  return this
-}
 
-/**
- * access the result of `this`
- *
- * @param {Function} onValue
- * @param {Function} onError
- * @return {this}
- */
+  /**
+  * give `this` its reason for failure
+  *
+  * @param {x} reason
+  * @return {this}
+  */
 
-Result.prototype.read = function(onValue, onError){
-  switch (this.state) {
-    case 'done':
-      onValue && runFn(this, onValue)
-      break
-    case 'fail':
-      if (onError) runFn(this, onError)
-      else rethrow(this.value)
-      break
-    default:
-      this.listen(onValue, onError || rethrow)
+  error(reason) {
+    if (this.state == 'pending') {
+      this.state = 'fail'
+      this.value = reason
+      this._onError && run(this, this._onError)
+    }
+    return this
   }
-  return this
+
+  /**
+  * access the result of `this` ASAP
+  *
+  * @param {Function} onValue
+  * @param {Function} onError
+  * @return {this}
+  */
+
+  read(onValue, onError) {
+    switch (this.state) {
+      case 'done':
+        onValue && runFn(this, onValue)
+        break
+      case 'fail':
+        if (onError) runFn(this, onError)
+        else rethrow(this.value)
+        break
+      default:
+        this.listen(onValue, onError || rethrow)
+    }
+    return this
+  }
+
+  /**
+  * add listeners for the result
+  *
+  * @param {Function} onValue
+  * @param {Function} onError
+  * @return {this}
+  */
+
+  listen(onValue, onError) {
+    onValue && listen(this, '_onValue', onValue)
+    onError && listen(this, '_onError', onError)
+  }
 }
 
-/**
- * add listeners for the result
- *
- * @param {Function} onValue
- * @param {Function} onError
- * @return {this}
- */
-
-Result.prototype.listen = function(onValue, onError){
-  onValue && listen(this, '_onValue', onValue)
-  onError && listen(this, '_onError', onError)
-}
-
-function listen(obj, prop, fn){
+const listen = (obj, prop, fn) => {
   var fns = obj[prop]
   if (!fns) obj[prop] = fn
   else if (typeof fns == 'function') obj[prop] = [fns, fn]
@@ -106,7 +92,7 @@ function listen(obj, prop, fn){
  * @api private
  */
 
-function run(ctx, fns){
+const run = (ctx, fns) => {
   if (typeof fns == 'function') runFn(ctx, fns)
   else for (var i = 0, len = fns.length; i < len;) {
     runFn(ctx, fns[i++])
@@ -120,24 +106,21 @@ function run(ctx, fns){
  * later the following would be non-deterministic
  *
  *   try {
- *     result.read(function(){
- *       throw(new Error('boom'))
+ *     result.read(() => {
+ *       throw new Error('boom')
  *     })
  *   } catch (e) {
  *     // if result is "done" boom is caught, while
  *     // if result is "pending" it won't be caught
  *   }
  *
- * @param {Function} fn
  * @param {Result} ctx
- * @api private
+ * @param {Function} fn
  */
 
-function runFn(ctx, fn){
-  try { fn.call(ctx, ctx.value) }
+const runFn = (ctx, fn) => {
+  try { fn(ctx.value) }
   catch (e) { rethrow(e) }
 }
 
-function rethrow(error){
-  nextTick(function(){ throw error })
-}
+const rethrow = error => nextTick(() => { throw error })

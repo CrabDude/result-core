@@ -1,4 +1,3 @@
-
 # result-core
 
 JavaScript doesn't allow you to spawn new threads. Nore does it allow you to park a thread programmatically. Instead it uses an "event loop", which functions as a sort of work queue. It allows you to request an operation and register a function to be called when its completed. This function is called a "callback" and it provides all the synchronization we need to compose computations however it leaves our control flow model FUBAR. Normally we think of values and errors as propagating up and down an implicit call stack. When a child computation completes it is returned to its parent frame where it can be passed into other computation frames or simply ignored and allowed to propagate up the stack. Meanwhile, in the "event loop" model values/errors are passed in to the callbacks as arguments which means both that they never become available in the parent context and that they can't just be allowed to propagate. Also without callstack's our error objects are mostly garbage.
@@ -9,36 +8,30 @@ This implementation does nothing to improve the stack traces of your errors but 
 
 ## Installation
 
-With your favorite package manager:
-
-- [packin](//github.com/jkroso/packin): `packin add result-core`
-- [component](//github.com/component/component#installing-packages): `component install jkroso/result-core`
-- [npm](//npmjs.org/doc/cli/npm-install.html): `npm install result-core`
+`npm install result-core`
 
 then in your app:
 
 ```js
-var Result = require('result-core')
+import Result from 'result-core'
 ```
 
 ## API
 
-### Result()
+### Result(state::String, value::Any)
 
-A class for creating concrete representations of function calls which can be manipulated programmatically at run-time.
+A class for creating concrete representations of function calls.
 
-### Result.state
+`state` can be one of:
 
-The state of the result. Can be one of:
-
-- pending
-- done
-- fail
+- `"pending"`
+- `"done"`
+- `"fail"`
 
 All Results start of in a "pending" state and will transition either to "done" or "fail".
 
 ```js
-new Result().state // => 'pending'
+new Result('pending').state // => 'pending'
 ```
 
 ### Result.value
@@ -47,7 +40,7 @@ The value of the Result. If the Result has a state of "fail" then this value is 
 
 ```js
 function add(a, b){
-  var result = new Result
+  var result = new Result('pending')
   result.write(a + b)
   return result
 }
@@ -60,7 +53,7 @@ add(1, 2).value // => 3
 give the Result its value and change its state to "done"
 
 ```js
-var one = new Result().write(1)
+var one = new Result('pending').write(1)
 one.state // => 'done'
 one.value // => 1
 ```
@@ -71,7 +64,7 @@ one.value // => 1
 
 ```js
 var err = new Error('coz oops')
-var two = new Result().error(err)
+var two = new Result('pending').error(err)
 two.state // => 'fail'
 two.value // => err
 ```
@@ -81,12 +74,9 @@ two.value // => err
   access the result of `this`
 
 ```js
-one.read(function(n){
-  n // => 1
-}) // error handlers are optional
+one.read(n => n /* n = 1 */) // error handlers are optional
 two.read(
-  null, // value handlers are also optional
-  function(e){
-    e // => err
-  })
+  null,  // value handlers are also optional
+  e => e // => err
+)
 ```
