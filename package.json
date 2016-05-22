@@ -1,6 +1,6 @@
 {
   "name": "result-core",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "minimal result reification",
   "keywords": ["result", "promise", "future"],
   "dependencies": {
@@ -19,7 +19,7 @@
     "chai": "*",
     "tryc": "*"
   },
-  "transpile": [["*.js", "!sourcegraph/babel->js", {"stage": 0}]],
+  "transpile": [["*.js", "!sourcegraph/babel->js", {"stage": 2}]],
   "repository": "git://github.com/jkroso/result-core.git",
   "bugs": "https://github.com/jkroso/result-core/issues",
   "author": "Jake Rosoman",
